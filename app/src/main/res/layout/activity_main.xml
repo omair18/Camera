@@ -20,6 +20,12 @@
         android:textSize="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/skin"
+        android:textSize="20dp"
+        android:text="肤色检测"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
     <org.opencv.android.JavaCameraView
         android:id="@+id/camera_view"
         android:visibility="gone"

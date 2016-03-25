@@ -22,7 +22,7 @@ private static final String TAG="MainActivity";
     private int mathed;
     private Mat mat;
     private CameraBridgeViewBase bridgeViewBase;
-    private BaseLoaderCallback loaderCallback=new BaseLoaderCallback(this) {
+    private BaseLoaderCallback mLoaderCallback=new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             Log.i(TAG,"BaseLoaderCallback");
@@ -43,7 +43,6 @@ private static final String TAG="MainActivity";
         }
     };
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "oncreat");
@@ -54,6 +53,38 @@ private static final String TAG="MainActivity";
         bridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         bridgeViewBase.setCvCameraViewListener(this);
 
+        /**
+         * 将RGB4通道图像转化为灰度图像
+         */
+        Button btn_gray= (Button) findViewById(R.id.gray);
+        btn_gray.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mathed=1;
+            }
+        });
+
+        /**
+         * 边缘检测
+         */
+        Button  btn_Canny= (Button) findViewById(R.id.canny);
+        btn_Canny.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mathed=2;
+            }
+        });
+
+        /**
+         *肤色检测
+         */
+        Button btn_skin= (Button) findViewById(R.id.skin);
+        btn_skin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mathed = 3;
+            }
+        });
     }
 
     @Override
@@ -67,7 +98,14 @@ private static final String TAG="MainActivity";
     @Override
     protected void onResume() {
         super.onResume();
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, loaderCallback);
+        //OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, loaderCallback);
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 
     @Override
@@ -98,32 +136,8 @@ private static final String TAG="MainActivity";
      */
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        Log.i(TAG,"onCameraFrame()");
+        Log.i(TAG, "onCameraFrame()");
         final Mat input=inputFrame.rgba();
-
-        /**
-         * 将RGB4通道图像转化为灰度图像
-         */
-        Button btn_gray= (Button) findViewById(R.id.gray);
-        btn_gray.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mathed=1;
-
-            }
-        });
-
-        /**
-         * 边缘检测
-         */
-        Button  btn_Canny= (Button) findViewById(R.id.canny);
-        btn_Canny.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mathed=2;
-
-            }
-        });
 
         switch (mathed){
             case 1:
@@ -132,6 +146,8 @@ private static final String TAG="MainActivity";
             case 2:
                 Imgproc.Canny(input,mat,100,100);
                 break;
+            case 3:
+
             default:
                 mat=input;
                 break;
@@ -140,7 +156,10 @@ private static final String TAG="MainActivity";
         return mat;
     }
 
+    Mat skin(Mat input){
+        Mat mat=new Mat(input.size(),CvType.CV_8UC1);
 
-
+        return mat;
+    }
 
 }
